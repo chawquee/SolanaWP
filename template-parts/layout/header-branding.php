@@ -53,7 +53,7 @@ if ( ! defined( 'ABSPATH' ) ) {
             ?>
             <p class="site-description screen-reader-text"><?php echo $solanawp_description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
         <?php endif; ?>
-    </div></div>```
+    </div></div>
 
 <?php
 /**
