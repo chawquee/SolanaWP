@@ -44,41 +44,14 @@ if ( ! defined( 'ABSPATH' ) ) {
         <?php endif; ?>
 
         <?php
-        // The WordPress site tagline (description) can be displayed if needed.
-        // The design in hannisolsvelte.html has a specific .subtitle and .slogan
-        // which are part of the main header block in header.php, not typically here.
-        // This is for the standard WP tagline if enabled in Customizer.
+        // The WordPress site tagline (description) is now removed as per request.
+        /*
         $solanawp_description = get_bloginfo( 'description', 'display' );
         if ( $solanawp_description || is_customize_preview() ) :
             ?>
             <p class="site-description screen-reader-text"><?php echo $solanawp_description; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
-        <?php endif; ?>
-    </div></div>
-
-<?php
-/**
- * Template part for displaying footer widgets if any are active.
- * It's assumed a 'footer-widgets' sidebar is registered in inc/widget-areas.php.
- * This allows for additional content or navigation in the footer, a common theme feature.
- *
- * @package SolanaWP
- * @since SolanaWP 1.0.0
- */
-
-// Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
-
-// Check if the 'footer-widgets' sidebar has any active widgets.
-if ( ! is_active_sidebar( 'footer-widgets' ) ) {
-    return; // If no widgets, output nothing.
-}
-?>
-<div class="footer-widgets-area widget-area"> <?php // General wrapper for footer widgets section. ?>
-    <div class="container footer-widgets-container"> <?php // Optional inner container for layout (you'd define .container style in main.css). ?>
-        <div class="footer-widgets-grid"> <?php // Optional grid wrapper for multiple footer widget columns (e.g., 3 or 4 columns). ?>
-            <?php dynamic_sidebar( 'footer-widgets' ); // Displays the widgets assigned to 'footer-widgets'. ?>
-        </div>
+        <?php endif;
+        */
+        ?>
     </div>
 </div>

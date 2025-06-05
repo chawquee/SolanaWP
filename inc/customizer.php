@@ -2,6 +2,7 @@
 /**
  * Enhanced SolanaWP Theme Customizer with Ad Banner Controls
  * Updated to match reference images and add ad customization
+ * Version 3: Unified Sidebar Ads, Blue Banner Color Options
  *
  * @package SolanaWP
  * @since SolanaWP 1.0.0
@@ -28,7 +29,7 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
             $wp_customize->selective_refresh->add_partial(
                 'blogname',
                 array(
-                    'selector'        => '.site-header .brand-name',
+                    'selector'        => '.site-header .brand-name a',
                     'render_callback' => 'solanawp_customize_partial_blogname',
                     'fallback_refresh' => false,
                 )
@@ -45,7 +46,7 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
         $wp_customize->add_panel( 'solanawp_theme_options_panel', array(
             'title'    => __( 'SolanaWP Theme Options', 'solanawp' ),
             'priority' => 30,
-            'description' => __( 'Customize all aspects of your Solana address checker theme.', 'solanawp' ),
+            'description' => __( 'Customize various aspects of the SolanaWP theme.', 'solanawp' ),
         ) );
 
         // --- Layout & Design Section ---
@@ -55,7 +56,7 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
                 'title'    => __( 'Layout & Design', 'solanawp' ),
                 'panel'    => 'solanawp_theme_options_panel',
                 'priority' => 5,
-                'description' => __( 'Control header height, spacing, and layout options.', 'solanawp' ),
+                'description' => __( 'Control header elements, spacing, and general layout options.', 'solanawp' ),
             )
         );
 
@@ -63,7 +64,7 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
         $wp_customize->add_setting(
             'solanawp_header_height',
             array(
-                'default'           => '100',
+                'default'           => 100,
                 'sanitize_callback' => 'absint',
                 'transport'         => 'postMessage',
             )
@@ -71,23 +72,50 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
         $wp_customize->add_control(
             'solanawp_header_height',
             array(
-                'label'   => __( 'Header Height (%)', 'solanawp' ),
-                'description' => __( 'Reduce to 50% for compact header as shown in reference.', 'solanawp'),
+                'label'   => __( 'Overall Header Height Scale (%)', 'solanawp' ),
+                'description' => __( 'Adjusts overall scaling of some header elements. Specific controls below might override parts of this.', 'solanawp'),
                 'section' => 'solanawp_layout_section',
                 'type'    => 'range',
-                'input_attrs' => array(
-                    'min'  => 30,
-                    'max'  => 150,
-                    'step' => 10,
-                ),
+                'input_attrs' => array( 'min'  => 30, 'max'  => 150, 'step' => 10, ),
+                'priority'    => 10,
             )
         );
+
+        // Logo Size
+        $wp_customize->add_setting( 'solanawp_logo_size', array(
+            'default'           => 80,
+            'sanitize_callback' => 'absint',
+            'transport'         => 'postMessage',
+        ));
+        $wp_customize->add_control( 'solanawp_logo_size', array(
+            'label'       => __( 'Logo Size (px)', 'solanawp' ),
+            'description' => __( 'Set the width and height of the logo.', 'solanawp' ),
+            'section'     => 'solanawp_layout_section',
+            'type'        => 'number',
+            'input_attrs' => array( 'min' => 30, 'max' => 150, 'step' => 1 ),
+            'priority'    => 15,
+        ));
+
+        // Brand Name Font Size
+        $wp_customize->add_setting( 'solanawp_brand_name_font_size', array(
+            'default'           => 20,
+            'sanitize_callback' => 'absint',
+            'transport'         => 'postMessage',
+        ));
+        $wp_customize->add_control( 'solanawp_brand_name_font_size', array(
+            'label'       => __( 'Brand Name Font Size (px)', 'solanawp' ),
+            'description' => __( 'Set the font size for the HANNISOL brand name.', 'solanawp' ),
+            'section'     => 'solanawp_layout_section',
+            'type'        => 'number',
+            'input_attrs' => array( 'min' => 10, 'max' => 50, 'step' => 1 ),
+            'priority'    => 20,
+        ));
 
         // Banner Edge Distance
         $wp_customize->add_setting(
             'solanawp_banner_edge_distance',
             array(
-                'default'           => '24',
+                'default'           => 24,
                 'sanitize_callback' => 'absint',
                 'transport'         => 'postMessage',
             )
@@ -96,14 +124,11 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
             'solanawp_banner_edge_distance',
             array(
                 'label'   => __( 'Banner Edge Distance (px)', 'solanawp' ),
-                'description' => __( 'Distance of ad banners from screen edge (3cm ≈ 113px).', 'solanawp'),
+                'description' => __( 'Adjusts padding around the main content grid.', 'solanawp'),
                 'section' => 'solanawp_layout_section',
                 'type'    => 'number',
-                'input_attrs' => array(
-                    'min'  => 8,
-                    'max'  => 150,
-                    'step' => 4,
-                ),
+                'input_attrs' => array( 'min'  => 0, 'max'  => 150, 'step' => 4, ),
+                'priority'    => 25,
             )
         );
 
@@ -111,7 +136,7 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
         $wp_customize->add_setting(
             'solanawp_analyzer_width',
             array(
-                'default'           => '100',
+                'default'           => 100,
                 'sanitize_callback' => 'absint',
                 'transport'         => 'postMessage',
             )
@@ -119,34 +144,87 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
         $wp_customize->add_control(
             'solanawp_analyzer_width',
             array(
-                'label'   => __( 'Analyzer Frame Width (%)', 'solanawp' ),
-                'description' => __( 'Make analyzer frame wider as requested.', 'solanawp'),
+                'label'   => __( 'Analyzer Frame Width Scale (%)', 'solanawp' ),
+                'description' => __( 'Scales the width of the central content area.', 'solanawp'),
                 'section' => 'solanawp_layout_section',
                 'type'    => 'range',
-                'input_attrs' => array(
-                    'min'  => 80,
-                    'max'  => 120,
-                    'step' => 5,
-                ),
+                'input_attrs' => array( 'min'  => 80, 'max'  => 120, 'step' => 5, ),
+                'priority'    => 30,
             )
         );
 
-        // --- Colors Section ---
+        // --- Blue Banner Section ---
+        $wp_customize->add_section( 'solanawp_blue_banner_section', array(
+            'title'       => __( 'Blue Info Banner', 'solanawp' ),
+            'panel'       => 'solanawp_theme_options_panel',
+            'priority'    => 15,
+            'description' => __( 'Customize the content and appearance of the blue informational banner.', 'solanawp'),
+        ));
+
+        $wp_customize->add_setting( 'solanawp_blue_banner_main_text', array(
+            'default'           => __( 'Advanced Blockchain Analysis Platform', 'solanawp' ),
+            'sanitize_callback' => 'sanitize_text_field',
+            'transport'         => 'postMessage',
+        ));
+        $wp_customize->add_control( 'solanawp_blue_banner_main_text', array(
+            'label'    => __( 'Blue Banner - Main Text', 'solanawp' ),
+            'section'  => 'solanawp_blue_banner_section',
+            'type'     => 'text',
+            'priority' => 10,
+        ));
+
+        $wp_customize->add_setting( 'solanawp_blue_banner_sub_text', array(
+            'default'           => __( 'Real-time validation - Risk assessment - Professional insights', 'solanawp' ),
+            'sanitize_callback' => 'sanitize_text_field',
+            'transport'         => 'postMessage',
+        ));
+        $wp_customize->add_control( 'solanawp_blue_banner_sub_text', array(
+            'label'    => __( 'Blue Banner - Sub-Text', 'solanawp' ),
+            'section'  => 'solanawp_blue_banner_section',
+            'type'     => 'text',
+            'priority' => 20,
+        ));
+
+        // Blue Banner Background Color
+        $wp_customize->add_setting( 'solanawp_blue_banner_bg_color', array(
+            'default'           => '#1e3a8a', // Default blue
+            'sanitize_callback' => 'sanitize_hex_color',
+            'transport'         => 'postMessage',
+        ));
+        $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'solanawp_blue_banner_bg_color', array(
+            'label'    => __( 'Blue Banner Background Color', 'solanawp' ),
+            'section'  => 'solanawp_blue_banner_section',
+            'priority' => 30,
+        )));
+
+        // Blue Banner Text Color
+        $wp_customize->add_setting( 'solanawp_blue_banner_text_color_customizer', array(
+            'default'           => '#ffffff', // Default white
+            'sanitize_callback' => 'sanitize_hex_color',
+            'transport'         => 'postMessage',
+        ));
+        $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'solanawp_blue_banner_text_color_customizer', array(
+            'label'    => __( 'Blue Banner Text Color', 'solanawp' ),
+            'section'  => 'solanawp_blue_banner_section',
+            'priority' => 40,
+        )));
+
+
+        // --- Colors Section (Accent Colors) ---
         $wp_customize->add_section(
             'solanawp_colors_section',
             array(
-                'title'    => __( 'Theme Colors', 'solanawp' ),
+                'title'    => __( 'Theme Accent Colors', 'solanawp' ),
                 'panel'    => 'solanawp_theme_options_panel',
                 'priority' => 10,
-                'description' => __( 'Customize theme colors including lighter blue option.', 'solanawp' ),
+                'description' => __( 'Customize theme accent colors for buttons, links, etc.', 'solanawp' ),
             )
         );
 
-        // Primary Accent Color (with lighter blue option)
         $wp_customize->add_setting(
             'solanawp_primary_accent_color',
             array(
-                'default'           => '#7c3aed', // Can be changed to lighter blue
+                'default'           => '#3b82f6',
                 'sanitize_callback' => 'sanitize_hex_color',
                 'transport'         => 'postMessage',
             )
@@ -157,19 +235,17 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
                 'solanawp_primary_accent_color',
                 array(
                     'label'   => __( 'Primary Accent Color', 'solanawp' ),
-                    'description' => __( 'Use lighter blue (#3b82f6) as suggested in reference.', 'solanawp'),
                     'section' => 'solanawp_colors_section',
                 )
             )
         );
 
-        // Secondary Accent Color
         $wp_customize->add_setting(
             'solanawp_secondary_accent_color',
             array(
-                'default'           => '#a855f7',
+                'default'           => '#8b5cf6',
                 'sanitize_callback' => 'sanitize_hex_color',
-                'transport'         => 'refresh',
+                'transport'         => 'postMessage',
             )
         );
         $wp_customize->add_control(
@@ -177,158 +253,82 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
                 $wp_customize,
                 'solanawp_secondary_accent_color',
                 array(
-                    'label'   => __( 'Secondary Accent Color', 'solanawp' ),
+                    'label'   => __( 'Secondary Accent Color (Gradients)', 'solanawp' ),
                     'section' => 'solanawp_colors_section',
                 )
             )
         );
 
-        // --- Left Sidebar Ad Banners Section ---
-        $wp_customize->add_section( 'solanawp_left_ads_section', array(
-            'title'       => __( 'Left Sidebar Ad Banners', 'solanawp' ),
+
+        // --- Unified Sidebar Ad Banners Section ---
+        $wp_customize->add_section( 'solanawp_sidebar_ads_section', array(
+            'title'       => __( 'Sidebar Ad Banners', 'solanawp' ),
             'panel'       => 'solanawp_theme_options_panel',
             'priority'    => 20,
-            'description' => __( 'Customize ad banners in the left sidebar.', 'solanawp'),
+            'description' => __( 'Configure up to 6 ad banners. These will be used for BOTH left and right sidebars if they are active.', 'solanawp'),
         ));
 
-        // Left Ad Banner 1
         for ($i = 1; $i <= 6; $i++) {
-            // Ad Title
-            $wp_customize->add_setting( "solanawp_left_ad_{$i}_title", array(
+            // Title
+            $wp_customize->add_setting( "solanawp_sidebar_ad_{$i}_title", array(
                 'default'           => '',
                 'sanitize_callback' => 'sanitize_text_field',
-                'transport'         => 'postMessage',
+                'transport'         => 'refresh', // Refresh needed as structure might change
             ));
-            $wp_customize->add_control( "solanawp_left_ad_{$i}_title", array(
-                'label'    => sprintf(__('Left Ad %d - Title', 'solanawp'), $i),
-                'section'  => 'solanawp_left_ads_section',
+            $wp_customize->add_control( "solanawp_sidebar_ad_{$i}_title", array(
+                'label'    => sprintf(__('Ad %d - Title', 'solanawp'), $i),
+                'section'  => 'solanawp_sidebar_ads_section',
                 'type'     => 'text',
             ));
 
-            // Ad Description
-            $wp_customize->add_setting( "solanawp_left_ad_{$i}_desc", array(
+            // Description
+            $wp_customize->add_setting( "solanawp_sidebar_ad_{$i}_desc", array(
                 'default'           => '',
                 'sanitize_callback' => 'sanitize_text_field',
-                'transport'         => 'postMessage',
+                'transport'         => 'refresh',
             ));
-            $wp_customize->add_control( "solanawp_left_ad_{$i}_desc", array(
-                'label'    => sprintf(__('Left Ad %d - Description', 'solanawp'), $i),
-                'section'  => 'solanawp_left_ads_section',
+            $wp_customize->add_control( "solanawp_sidebar_ad_{$i}_desc", array(
+                'label'    => sprintf(__('Ad %d - Description', 'solanawp'), $i),
+                'section'  => 'solanawp_sidebar_ads_section',
                 'type'     => 'text',
             ));
 
-            // Ad URL
-            $wp_customize->add_setting( "solanawp_left_ad_{$i}_url", array(
+            // URL
+            $wp_customize->add_setting( "solanawp_sidebar_ad_{$i}_url", array(
                 'default'           => '#',
                 'sanitize_callback' => 'esc_url_raw',
-                'transport'         => 'postMessage',
+                'transport'         => 'refresh',
             ));
-            $wp_customize->add_control( "solanawp_left_ad_{$i}_url", array(
-                'label'    => sprintf(__('Left Ad %d - URL', 'solanawp'), $i),
-                'section'  => 'solanawp_left_ads_section',
+            $wp_customize->add_control( "solanawp_sidebar_ad_{$i}_url", array(
+                'label'    => sprintf(__('Ad %d - URL', 'solanawp'), $i),
+                'section'  => 'solanawp_sidebar_ads_section',
                 'type'     => 'url',
             ));
 
-            // Ad Size
-            $wp_customize->add_setting( "solanawp_left_ad_{$i}_size", array(
+            // Size
+            $wp_customize->add_setting( "solanawp_sidebar_ad_{$i}_size", array(
                 'default'           => 'large',
-                'sanitize_callback' => 'sanitize_text_field',
-                'transport'         => 'postMessage',
+                'sanitize_callback' => 'sanitize_text_field', // Accepts 'large' or 'small'
+                'transport'         => 'refresh',
             ));
-            $wp_customize->add_control( "solanawp_left_ad_{$i}_size", array(
-                'label'    => sprintf(__('Left Ad %d - Size', 'solanawp'), $i),
-                'section'  => 'solanawp_left_ads_section',
+            $wp_customize->add_control( "solanawp_sidebar_ad_{$i}_size", array(
+                'label'    => sprintf(__('Ad %d - Size', 'solanawp'), $i),
+                'section'  => 'solanawp_sidebar_ads_section',
                 'type'     => 'select',
                 'choices'  => array(
-                    'large' => __('Large (250px)', 'solanawp'),
-                    'small' => __('Small (120px)', 'solanawp'),
+                    'large' => __('Large (Default)', 'solanawp'),
+                    'small' => __('Small', 'solanawp'),
                 ),
             ));
 
             // Separator
             if ($i < 6) {
-                $wp_customize->add_setting( "solanawp_left_ad_{$i}_separator", array(
-                    'sanitize_callback' => 'sanitize_text_field',
+                $wp_customize->add_setting( "solanawp_sidebar_ad_{$i}_separator", array(
+                    'sanitize_callback' => 'sanitize_text_field', // No real value, just for control
                 ));
-                $wp_customize->add_control( new WP_Customize_Control( $wp_customize, "solanawp_left_ad_{$i}_separator", array(
-                    'label'       => '',
-                    'section'     => 'solanawp_left_ads_section',
-                    'type'        => 'hidden',
-                    'description' => '<hr style="margin: 20px 0;">',
-                )));
-            }
-        }
-
-        // --- Right Sidebar Ad Banners Section ---
-        $wp_customize->add_section( 'solanawp_right_ads_section', array(
-            'title'       => __( 'Right Sidebar Ad Banners', 'solanawp' ),
-            'panel'       => 'solanawp_theme_options_panel',
-            'priority'    => 25,
-            'description' => __( 'Customize ad banners in the right sidebar.', 'solanawp'),
-        ));
-
-        // Right Ad Banners (similar structure)
-        for ($i = 1; $i <= 6; $i++) {
-            // Ad Title
-            $wp_customize->add_setting( "solanawp_right_ad_{$i}_title", array(
-                'default'           => '',
-                'sanitize_callback' => 'sanitize_text_field',
-                'transport'         => 'postMessage',
-            ));
-            $wp_customize->add_control( "solanawp_right_ad_{$i}_title", array(
-                'label'    => sprintf(__('Right Ad %d - Title', 'solanawp'), $i),
-                'section'  => 'solanawp_right_ads_section',
-                'type'     => 'text',
-            ));
-
-            // Ad Description
-            $wp_customize->add_setting( "solanawp_right_ad_{$i}_desc", array(
-                'default'           => '',
-                'sanitize_callback' => 'sanitize_text_field',
-                'transport'         => 'postMessage',
-            ));
-            $wp_customize->add_control( "solanawp_right_ad_{$i}_desc", array(
-                'label'    => sprintf(__('Right Ad %d - Description', 'solanawp'), $i),
-                'section'  => 'solanawp_right_ads_section',
-                'type'     => 'text',
-            ));
-
-            // Ad URL
-            $wp_customize->add_setting( "solanawp_right_ad_{$i}_url", array(
-                'default'           => '#',
-                'sanitize_callback' => 'esc_url_raw',
-                'transport'         => 'postMessage',
-            ));
-            $wp_customize->add_control( "solanawp_right_ad_{$i}_url", array(
-                'label'    => sprintf(__('Right Ad %d - URL', 'solanawp'), $i),
-                'section'  => 'solanawp_right_ads_section',
-                'type'     => 'url',
-            ));
-
-            // Ad Size
-            $wp_customize->add_setting( "solanawp_right_ad_{$i}_size", array(
-                'default'           => 'large',
-                'sanitize_callback' => 'sanitize_text_field',
-                'transport'         => 'postMessage',
-            ));
-            $wp_customize->add_control( "solanawp_right_ad_{$i}_size", array(
-                'label'    => sprintf(__('Right Ad %d - Size', 'solanawp'), $i),
-                'section'  => 'solanawp_right_ads_section',
-                'type'     => 'select',
-                'choices'  => array(
-                    'large' => __('Large (250px)', 'solanawp'),
-                    'small' => __('Small (120px)', 'solanawp'),
-                ),
-            ));
-
-            if ($i < 6) {
-                $wp_customize->add_setting( "solanawp_right_ad_{$i}_separator", array(
-                    'sanitize_callback' => 'sanitize_text_field',
-                ));
-                $wp_customize->add_control( new WP_Customize_Control( $wp_customize, "solanawp_right_ad_{$i}_separator", array(
-                    'label'       => '',
-                    'section'     => 'solanawp_right_ads_section',
-                    'type'        => 'hidden',
+                $wp_customize->add_control( new WP_Customize_Control( $wp_customize, "solanawp_sidebar_ad_{$i}_separator", array(
+                    'section'     => 'solanawp_sidebar_ads_section',
+                    'type'        => 'hidden', // Effectively a way to add markup
                     'description' => '<hr style="margin: 20px 0;">',
                 )));
             }
@@ -339,41 +339,22 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
             'title'       => __( 'Affiliate Links (Checker Page)', 'solanawp' ),
             'panel'       => 'solanawp_theme_options_panel',
             'priority'    => 30,
-            'description' => __( 'Configure affiliate URLs in the checker results.', 'solanawp'),
+            'description' => __( 'Configure affiliate URLs for the "Recommended Security Tools" section.', 'solanawp'),
         ));
-
         $affiliate_items_config = array(
-            'ledger' => array(
-                'label' => __('Ledger Wallet URL', 'solanawp'),
-                'default' => '#'
-            ),
-            'vpn'    => array(
-                'label' => __('VPN Service URL', 'solanawp'),
-                'default' => '#'
-            ),
-            'guide'  => array(
-                'label' => __('Security Guide URL', 'solanawp'),
-                'default' => '#'
-            ),
-            'course' => array(
-                'label' => __('Crypto Course URL', 'solanawp'),
-                'default' => '#'
-            ),
+            'ledger' => array('label' => __('Ledger Wallet URL', 'solanawp'), 'default' => '#'),
+            'vpn'    => array('label' => __('VPN Service URL', 'solanawp'), 'default' => '#'),
+            'guide'  => array('label' => __('Security Guide URL', 'solanawp'), 'default' => '#'),
+            'course' => array('label' => __('Crypto Course URL', 'solanawp'), 'default' => '#'),
         );
-
         $item_priority = 10;
         foreach ( $affiliate_items_config as $key => $config ) {
             $setting_id = "solanawp_affiliate_{$key}_url";
             $wp_customize->add_setting( $setting_id, array(
-                'default'           => esc_url_raw( $config['default'] ),
-                'transport'         => 'refresh',
-                'sanitize_callback' => 'esc_url_raw',
+                'default' => esc_url_raw( $config['default'] ), 'transport' => 'refresh', 'sanitize_callback' => 'esc_url_raw',
             ));
             $wp_customize->add_control( $setting_id, array(
-                'label'    => $config['label'],
-                'section'  => 'solanawp_affiliate_links_section',
-                'type'     => 'url',
-                'priority' => $item_priority,
+                'label' => $config['label'], 'section' => 'solanawp_affiliate_links_section', 'type' => 'url', 'priority' => $item_priority,
             ));
             $item_priority += 10;
         }
@@ -384,33 +365,27 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
             'panel'    => 'solanawp_theme_options_panel',
             'priority' => 35,
         ));
-
-        // Footer Copyright Text
         $wp_customize->add_setting('solanawp_footer_copyright_text', array(
             'default'           => sprintf(
                 esc_html__( '&copy; %1$s %2$s. All rights reserved. Theme by %3$s.', 'solanawp' ),
-                date_i18n('Y'),
-                esc_html( get_bloginfo('name') ),
-                '<a href="https://www.worldgpl.com/" target="_blank" rel="noopener">WORLDGPL</a>'
+                date_i18n('Y'), esc_html( get_bloginfo('name') ),
+                '<a href="https://www.worldgpl.com/" target="_blank" rel="noopener noreferrer author">WORLDGPL</a>'
             ),
-            'sanitize_callback' => 'wp_kses_post',
-            'transport'         => 'postMessage',
+            'sanitize_callback' => 'wp_kses_post', 'transport' => 'postMessage',
         ));
         $wp_customize->add_control('solanawp_footer_copyright_text', array(
-            'label'       => __('Footer Copyright Text', 'solanawp'),
-            'section'     => 'solanawp_footer_settings_section',
-            'type'        => 'textarea',
+            'label' => __('Footer Copyright Text', 'solanawp'), 'section' => 'solanawp_footer_settings_section', 'type' => 'textarea',
         ));
-
         if ( isset( $wp_customize->selective_refresh ) ) {
             $wp_customize->selective_refresh->add_partial( 'solanawp_footer_copyright_text', array(
-                'selector'        => '.site-footer .site-info',
+                'selector' => '.site-footer .site-info',
                 'render_callback' => 'solanawp_customize_partial_footer_copyright',
                 'fallback_refresh' => false,
             ));
         }
     }
-endif;
+endif; // solanawp_customize_register
+
 
 // Render Callbacks
 if ( ! function_exists( 'solanawp_customize_partial_blogname' ) ) :
@@ -421,15 +396,14 @@ endif;
 
 if ( ! function_exists( 'solanawp_customize_partial_custom_logo_or_fallback' ) ) :
     function solanawp_customize_partial_custom_logo_or_fallback() {
+        if ( function_exists( 'solanawp_get_logo_or_fallback_html' ) ) {
+            return solanawp_get_logo_or_fallback_html();
+        }
         ob_start();
         if ( function_exists( 'the_custom_logo' ) && has_custom_logo() ) {
             the_custom_logo();
         } else {
-            ?>
-            <div class="logo">
-                <div class="logo-h">H</div>
-            </div>
-            <?php
+            echo '<div class="logo"><div class="logo-h">H</div></div>';
         }
         return ob_get_clean();
     }
@@ -437,57 +411,13 @@ endif;
 
 if ( ! function_exists( 'solanawp_customize_partial_footer_copyright' ) ) :
     function solanawp_customize_partial_footer_copyright() {
-        $copyright_text = get_theme_mod( 'solanawp_footer_copyright_text', sprintf(
+        $default_copyright = sprintf(
             esc_html__( '&copy; %1$s %2$s. All rights reserved. Theme by %3$s.', 'solanawp' ),
-            date_i18n('Y'),
-            esc_html( get_bloginfo('name') ),
-            '<a href="https://www.worldgpl.com/" target="_blank" rel="noopener">WORLDGPL</a>'
-        ) );
+            date_i18n('Y'), esc_html( get_bloginfo('name') ),
+            '<a href="https://www.worldgpl.com/" target="_blank" rel="noopener noreferrer author">WORLDGPL</a>'
+        );
+        $copyright_text = get_theme_mod( 'solanawp_footer_copyright_text', $default_copyright );
         echo wp_kses_post( $copyright_text );
-    }
-endif;
-
-// CSS Output Function
-if ( ! function_exists( 'solanawp_customizer_css_output' ) ) :
-    function solanawp_customizer_css_output() {
-        $header_height = get_theme_mod( 'solanawp_header_height', 100 );
-        $banner_distance = get_theme_mod( 'solanawp_banner_edge_distance', 24 );
-        $analyzer_width = get_theme_mod( 'solanawp_analyzer_width', 100 );
-        $primary_color = get_theme_mod( 'solanawp_primary_accent_color', '#7c3aed' );
-        $secondary_color = get_theme_mod( 'solanawp_secondary_accent_color', '#a855f7' );
-
-        $css = '<style type="text/css" id="solanawp-customizer-css">';
-
-        // Header height adjustment
-        if ( $header_height !== 100 ) {
-            $scale = $header_height / 100;
-            $css .= '.site-header .header { padding: ' . (8 * $scale) . 'px ' . (16 * $scale) . 'px; }';
-            $css .= '.custom-logo-link img, .site-header .logo { width: ' . (100 * $scale) . 'px; height: ' . (100 * $scale) . 'px; }';
-            $css .= '.site-header .brand-name { font-size: ' . (24 * $scale) . 'px; margin-bottom: ' . (4 * $scale) . 'px; }';
-        }
-
-        // Banner edge distance
-        if ( $banner_distance !== 24 ) {
-            $css .= '.main-container { padding: ' . $banner_distance . 'px; }';
-        }
-
-        // Analyzer width
-        if ( $analyzer_width !== 100 ) {
-            $width_scale = $analyzer_width / 100;
-            $css .= '.content-area { max-width: ' . (100 * $width_scale) . '%; }';
-        }
-
-        // Colors
-        if ( $primary_color !== '#7c3aed' ) {
-            $css .= 'a:hover, .check-btn, .primary-menu li a:hover { color: ' . esc_attr( $primary_color ) . '; }';
-            $css .= '.check-btn { background: linear-gradient(135deg, ' . esc_attr( $primary_color ) . ' 0%, ' . esc_attr( $secondary_color ) . ' 100%); }';
-        }
-
-        $css .= '</style>';
-
-        if ( str_replace(array('<style type="text/css" id="solanawp-customizer-css">', '</style>'), '', $css) !== '' ) {
-            echo $css;
-        }
     }
 endif;
 
@@ -498,8 +428,15 @@ if ( ! function_exists( 'solanawp_customize_preview_js' ) ) :
             'solanawp-customizer-preview',
             get_template_directory_uri() . '/assets/js/customizer.js',
             array( 'customize-preview', 'jquery' ),
-            '1.0.0',
+            defined('SOLANAWP_VERSION') ? SOLANAWP_VERSION : '1.0.0',
             true
         );
+
+        wp_localize_script('solanawp-customizer-preview', 'solanawpCustomizerPreviewData', array(
+            'blueBannerMainTextDefault' => __( 'Advanced Blockchain Analysis Platform', 'solanawp' ),
+            'blueBannerSubTextDefault' => __( 'Real-time validation - Risk assessment - Professional insights', 'solanawp' ),
+            'blueBannerBgColorDefault' => '#1e3a8a',
+            'blueBannerTextColorDefault' => '#ffffff',
+        ));
     }
 endif;

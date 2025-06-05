@@ -47,11 +47,12 @@ if ( ! function_exists( 'solanawp_scripts_styles' ) ) :
             SOLANAWP_VERSION
         );
 
-        // 4. Google Fonts (as imported in hannisolsvelte.html)
+        // 4. Google Fonts (as imported in hannisolsvelte.html and new Montserrat)
         // The font "Times" is specified for branding in solanacheckerplan.txt.
+        // Added "Montserrat" for the new "Solana Coins Analyzer" section.
         wp_enqueue_style(
             'solanawp-google-fonts',
-            'https://fonts.googleapis.com/css2?family=Times:wght@400;600;700&display=swap', // URL from hannisolsvelte.html
+            'https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;1,400&family=Times:wght@400;600;700&display=swap', // URL updated to include Montserrat
             array(), // No local stylesheet dependencies.
             null // No version number for external resources like Google Fonts.
         );

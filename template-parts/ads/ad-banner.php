@@ -1,24 +1,21 @@
 <?php
 /**
  * Template part for displaying a generic ad banner structure.
- * This can be used by custom widgets (like SolanaWP_Ad_Banner_Widget) or directly in templates.
- * The styling for .ad-banner and .ad-banner.small comes from main.css,
- * which is based on hannisolsvelte.html.
- * This supports the monetization strategy.
+ * This can be used by custom widgets or directly in templates.
  *
  * @package SolanaWP
  * @since SolanaWP 1.0.0
  *
  * @param array $args {
  * Optional. Array of arguments passed to the template part.
- *
  * @type string $size            Optional. Size of the ad banner ('small' or 'large'/'default').
- * If 'small', the class '.small' is added to '.ad-banner'.
- * @type string $ad_title        Optional. Title/Network for the ad (e.g., "A-ADS").
- * @type string $ad_description  Optional. Description or type of ad (e.g., "Crypto Ad Network").
- * @type string $ad_details      Optional. Additional details like CPM/CPC (e.g., "$0.50-$2.00 CPM").
- * @type string $ad_code         Optional. Actual ad code HTML/JS. If provided, title/desc/details are ignored for display.
+ * @type string $ad_title        Optional. Title/Network for the ad.
+ * @type string $ad_description  Optional. Description or type of ad.
+ * @type string $ad_details      Optional. Additional details like CPM/CPC.
+ * @type string $ad_code         Optional. Actual ad code HTML/JS.
+ * @type string $ad_url          Optional. URL for text-based ads.
  * @type string $custom_classes  Optional. Additional custom classes for the ad banner div.
+ * @type string $ad_section_slug Optional. Slug for the Customizer ad section (e.g., 'solanawp_left_ads_section').
  * }
  */
 
@@ -27,51 +24,40 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-// Set defaults for arguments
 $default_args = array(
-    'size'           => '', // 'small' or empty for default/large (250px height)
+    'size'           => '',
     'ad_title'       => '',
     'ad_description' => '',
     'ad_details'     => '',
     'ad_code'        => '',
+    'ad_url'         => '#',
     'custom_classes' => '',
+    'ad_section_slug'=> '', // New argument for admin link
 );
-// Allow $args to be passed via set_query_var or directly if using include.
-// For get_template_part, $args is the third parameter.
 $args = wp_parse_args( isset($args) ? $args : array(), $default_args );
 
-
-$banner_classes = 'ad-banner'; // Base class from hannisolsvelte.html
+$banner_classes = 'ad-banner';
 if ( ! empty( $args['size'] ) && 'small' === $args['size'] ) {
-    $banner_classes .= ' small'; // Adds .small class for 120px height, from hannisolsvelte.html
+    $banner_classes .= ' small';
 }
 if ( ! empty( $args['custom_classes'] ) ) {
     $banner_classes .= ' ' . esc_attr($args['custom_classes']);
 }
 
-// Determine font sizes based on banner size, mimicking hannisolsvelte.html structure examples
-$title_style = '';
-$desc_style = '';
-$details_style = 'font-size: 12px; opacity: 0.7;'; // Consistent for both sizes in HTML examples
+$title_style = ('small' === $args['size']) ? 'font-size: 16px; margin-bottom: 4px; font-weight: bold;' : 'font-size: 18px; margin-bottom: 8px; font-weight: bold;';
+$desc_style = ('small' === $args['size']) ? 'font-size: 14px;' : '';
+$details_style = 'font-size: 12px; opacity: 0.7; margin-top: 4px;';
 
-if ( 'small' === $args['size'] ) {
-    $title_style = 'font-size: 16px; margin-bottom: 4px;'; // From .ad-banner.small examples in hannisolsvelte.html
-    $desc_style = 'font-size: 14px;'; // From .ad-banner.small examples in hannisolsvelte.html
-} else {
-    $title_style = 'font-size: 18px; margin-bottom: 8px;'; // From .ad-banner (large) examples in hannisolsvelte.html
-    // Description for large banner in HTML example uses default font size, so $desc_style can be empty.
-}
+$link_attrs = ( $args['ad_url'] !== '#' && filter_var($args['ad_url'], FILTER_VALIDATE_URL) ) ? 'href="' . esc_url( $args['ad_url'] ) . '" target="_blank" rel="noopener noreferrer sponsored"' : '';
 
 ?>
 
 <div class="<?php echo esc_attr( $banner_classes ); ?>">
     <?php if ( ! empty( $args['ad_code'] ) ) : ?>
-        <?php echo $args['ad_code']; // IMPORTANT: Ad code often contains <script> tags.
-        // Ensure this is only populated from trusted sources (e.g., admin settings
-        // where only users with 'unfiltered_html' capability can save it).
-        // No direct esc_html() here as it would break scripts. ?>
-    <?php else : // Display structured text if no ad_code is provided ?>
-        <div>
+        <?php echo $args['ad_code']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped (Ad code from trusted source) ?>
+    <?php else : ?>
+        <?php if ( $link_attrs ) : ?><a <?php echo $link_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> style="text-decoration: none; color: inherit; display: block; width: 100%; height: 100%; padding: 10px; box-sizing: border-box;"><?php endif; ?>
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
             <?php if ( ! empty( $args['ad_title'] ) ) : ?>
                 <div style="<?php echo esc_attr($title_style); ?>">
                     <?php echo esc_html( $args['ad_title'] ); ?>
@@ -89,6 +75,16 @@ if ( 'small' === $args['size'] ) {
                     <?php echo esc_html( $args['ad_details'] ); ?>
                 </div>
             <?php endif; ?>
+        </div>
+        <?php if ( $link_attrs ) : ?></a><?php endif; ?>
+    <?php endif; ?>
+
+    <?php // Admin Config Link - This would be included if the rendering function passes 'ad_section_slug' ?>
+    <?php if ( current_user_can( 'customize' ) && !empty( $args['ad_section_slug'] ) ) :
+        $customizer_link = admin_url( 'customize.php?autofocus[section]=' . esc_attr($args['ad_section_slug']) );
+        ?>
+        <div class="admin-configure-ad-link">
+            <a href="<?php echo esc_url( $customizer_link ); ?>" title="<?php esc_attr_e('Configure this ad', 'solanawp'); ?>">&#9881;</a>
         </div>
     <?php endif; ?>
 </div>

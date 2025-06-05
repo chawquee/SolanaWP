@@ -2,7 +2,7 @@
 /**
  * UPDATED templates/template-address-checker.php
  * Replace the existing template-address-checker.php with this version
- * Includes the new symmetric layout with both sidebars
+ * Includes the new symmetric layout with both sidebars (right sidebar is now dynamic)
  */
 
 // Exit if accessed directly.
@@ -14,18 +14,20 @@ get_header(); // Includes header.php
 ?>
     <div class="main-container">
         <!-- Left Sidebar -->
-        <?php get_sidebar(); // This will display the left sidebar ?>
+        <?php get_sidebar(); // This will display the left sidebar (dynamically rendered from Customizer) ?>
 
         <!-- Main Content Area -->
         <div id="primary" class="content-area address-checker-content">
             <main id="main" class="site-main solanawp-checker-main" role="main">
                 <?php
-                // Don't display the default page content that might contain "Welcome to WordPress"
-                // Comment out or remove this section:
+                // Page content (like from the WordPress editor for this page)
+                // is intentionally not displayed for the checker template by default
+                // to keep the focus on the checker tool.
+                // If you need to show content from the WP editor, you can uncomment the loop:
                 /*
                 while ( have_posts() ) :
                     the_post();
-                    // Optional page content is now hidden
+                    the_content();
                 endwhile;
                 wp_reset_postdata();
                 */
@@ -53,114 +55,22 @@ get_header(); // Includes header.php
             </main>
         </div>
 
-        <!-- Right Sidebar (New) -->
-        <aside id="secondary-right" class="widget-area sidebar-right" role="complementary">
-            <?php
-            // Right sidebar ad banners - symmetric to left side
-            ?>
-            <div class="ad-banner">
-                <div>
-                    <div style="font-size: 18px; margin-bottom: 8px;">💎 Premium Crypto</div>
-                    <div>Exclusive Offers</div>
-                    <div style="font-size: 12px; opacity: 0.7;">$3-$10 CPM</div>
-                </div>
-            </div>
-
-            <div class="ad-banner">
-                <div>
-                    <div style="font-size: 18px; margin-bottom: 8px;">🚀 Launch Platform</div>
-                    <div>Token Launches</div>
-                    <div style="font-size: 12px; opacity: 0.7;">$100-$500 signup</div>
-                </div>
-            </div>
-
-            <div class="ad-banner">
-                <div>
-                    <div style="font-size: 18px; margin-bottom: 8px;">📱 Trading Bot</div>
-                    <div>Automated Trading</div>
-                    <div style="font-size: 12px; opacity: 0.7;">$25-$75 monthly</div>
-                </div>
-            </div>
-
-            <div class="ad-banner small">
-                <div>
-                    <div style="font-size: 16px; margin-bottom: 4px;">🎯 Smart Contracts</div>
-                    <div style="font-size: 14px;">Audit Services</div>
-                </div>
-            </div>
-
-            <div class="ad-banner small">
-                <div>
-                    <div style="font-size: 16px; margin-bottom: 4px;">💰 Staking Pool</div>
-                    <div style="font-size: 14px;">High Rewards</div>
-                </div>
-            </div>
-
-            <div class="ad-banner small">
-                <div>
-                    <div style="font-size: 16px; margin-bottom: 4px;">🔒 Cold Storage</div>
-                    <div style="font-size: 14px;">Ultimate Security</div>
-                </div>
-            </div>
-
-            <div class="ad-banner small">
-                <div>
-                    <div style="font-size: 16px; margin-bottom: 4px;">📊 Portfolio Tracker</div>
-                    <div style="font-size: 14px;">Real-time Updates</div>
-                </div>
-            </div>
-
-            <div class="ad-banner small">
-                <div>
-                    <div style="font-size: 16px; margin-bottom: 4px;">🎓 Crypto Academy</div>
-                    <div style="font-size: 14px;">Learn & Earn</div>
-                </div>
-            </div>
-
-            <div class="ad-banner">
-                <div>
-                    <div style="font-size: 18px; margin-bottom: 8px;">🌐 DeFi Aggregator</div>
-                    <div>Best Rates</div>
-                    <div style="font-size: 12px; opacity: 0.7;">Compare All DEXs</div>
-                </div>
-            </div>
-
-            <div class="ad-banner small">
-                <div>
-                    <div style="font-size: 16px; margin-bottom: 4px;">⚡ Instant Swap</div>
-                    <div style="font-size: 14px;">Zero Slippage</div>
-                </div>
-            </div>
-
-            <div class="ad-banner small">
-                <div>
-                    <div style="font-size: 16px; margin-bottom: 4px;">🏆 NFT Marketplace</div>
-                    <div style="font-size: 14px;">Exclusive Drops</div>
-                </div>
-            </div>
-
-            <div class="ad-banner small">
-                <div>
-                    <div style="font-size: 16px; margin-bottom: 4px;">🔍 On-Chain Analytics</div>
-                    <div style="font-size: 14px;">Deep Insights</div>
-                </div>
-            </div>
-
-            <div class="ad-banner">
-                <div>
-                    <div style="font-size: 18px; margin-bottom: 8px;">🎪 Brand Partnership</div>
-                    <div>Sponsored Placements</div>
-                    <div style="font-size: 12px; opacity: 0.7;">Premium Visibility</div>
-                </div>
-            </div>
-
-            <div class="ad-banner small">
-                <div>
-                    <div style="font-size: 16px; margin-bottom: 4px;">🎮 Web3 Gaming</div>
-                    <div style="font-size: 14px;">Earn While Playing</div>
-                </div>
-            </div>
-        </aside>
+        <!-- Right Sidebar (Updated to be dynamic) -->
+        <?php
+        // Ensure the function exists before calling it.
+        // This function is defined in functions.php and renders ads from the Customizer
+        // for the right sidebar, mirroring the left sidebar's functionality.
+        if ( function_exists( 'solanawp_get_right_sidebar' ) ) {
+            echo solanawp_get_right_sidebar();
+        } else {
+            // Fallback if the function is somehow not available
+            // You could output a placeholder or an error message here.
+            // For example, a simple placeholder:
+            echo '<aside id="secondary-right" class="widget-area sidebar-right" role="complementary">';
+            echo '<p>Right sidebar content is unavailable.</p>';
+            echo '</aside>';
+        }
+        ?>
     </div>
 <?php
 get_footer(); // Includes footer.php
