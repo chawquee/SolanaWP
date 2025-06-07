@@ -2,7 +2,7 @@
 /**
  * Enhanced SolanaWP Theme Customizer with Ad Banner Controls
  * Updated to match reference images and add ad customization
- * Version 3: Unified Sidebar Ads, Blue Banner Color Options
+ * Version 5: Added full customization for Hero and Analyzer Banners
  *
  * @package SolanaWP
  * @since SolanaWP 1.0.0
@@ -48,6 +48,108 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
             'priority' => 30,
             'description' => __( 'Customize various aspects of the SolanaWP theme.', 'solanawp' ),
         ) );
+
+        // --- Helper function for font choices ---
+        function solanawp_get_font_choices() {
+            return array(
+                'inherit' => __( 'Theme Default', 'solanawp' ),
+                'Arial, sans-serif' => 'Arial',
+                "'Times New Roman', Times, serif" => 'Times New Roman',
+                "'Courier New', Courier, monospace" => 'Courier New',
+                'Georgia, serif' => 'Georgia',
+                'Verdana, sans-serif' => 'Verdana',
+                'Tahoma, sans-serif' => 'Tahoma',
+            );
+        }
+
+        // --- Hero Banner Section ("Advanced Blockchain Analysis Platform") ---
+        $wp_customize->add_section( 'solanawp_hero_banner_section', array(
+            'title'       => __( 'Platform Banner', 'solanawp' ),
+            'panel'       => 'solanawp_theme_options_panel',
+            'priority'    => 12,
+            'description' => __( 'Customize the "Advanced Blockchain Analysis Platform" banner.', 'solanawp'),
+        ));
+
+        // --- Analyzer Banner Section ("Solana Coins Analyzer") ---
+        $wp_customize->add_section( 'solanawp_analyzer_banner_section', array(
+            'title'       => __( 'Analyzer Title Banner', 'solanawp' ),
+            'panel'       => 'solanawp_theme_options_panel',
+            'priority'    => 13,
+            'description' => __( 'Customize the "Solana Coins Analyzer" title banner.', 'solanawp'),
+        ));
+
+        // --- Loop to create controls for both banners ---
+        $banners_to_customize = array(
+            'hero' => array(
+                'section' => 'solanawp_hero_banner_section',
+                'id_prefix' => 'solanawp_hero',
+                'default_text' => __( 'Advanced Blockchain Analysis Platform', 'solanawp' ),
+                'default_subtext' => __( 'Real-time validation - Risk assessment - Professional insights', 'solanawp' ),
+            ),
+            'analyzer' => array(
+                'section' => 'solanawp_analyzer_banner_section',
+                'id_prefix' => 'solanawp_analyzer',
+                'default_text' => __( 'Solana Coins Analyzer', 'solanawp' ),
+                'default_subtext' => __( "Comprehensive validation and analysis for Solana addresses. Hannisol's Insight, Navigating Crypto Like Hannibal Crossed the Alps.", 'solanawp' ),
+            )
+        );
+
+        foreach ($banners_to_customize as $key => $config) {
+            // Background Type
+            $wp_customize->add_setting( "{$config['id_prefix']}_bg_type", array('default' => 'color', 'sanitize_callback' => 'sanitize_text_field'));
+            $wp_customize->add_control( "{$config['id_prefix']}_bg_type", array('label' => __( 'Background Type', 'solanawp' ), 'section' => $config['section'], 'type' => 'radio', 'choices' => array('color' => __( 'Color', 'solanawp' ), 'image' => __( 'Image', 'solanawp' ))));
+            // Background Color
+            $wp_customize->add_setting( "{$config['id_prefix']}_bg_color", array('default' => ($key === 'hero' ? '#1e3a8a' : '#ffffff'), 'sanitize_callback' => 'sanitize_hex_color'));
+            $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, "{$config['id_prefix']}_bg_color", array('label' => __( 'Background Color', 'solanawp' ), 'section' => $config['section'])));
+            // Background Image
+            $wp_customize->add_setting( "{$config['id_prefix']}_bg_image", array('sanitize_callback' => 'esc_url_raw'));
+            $wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, "{$config['id_prefix']}_bg_image", array('label' => __( 'Background Image', 'solanawp' ), 'section' => $config['section'])));
+
+            // Content Type
+            $wp_customize->add_setting( "{$config['id_prefix']}_content_type", array('default' => 'text', 'sanitize_callback' => 'sanitize_text_field'));
+            $wp_customize->add_control( "{$config['id_prefix']}_content_type", array('label' => __( 'Content Type', 'solanawp' ), 'section' => $config['section'], 'type' => 'radio', 'choices' => array('text' => __( 'Text', 'solanawp' ), 'image' => __( 'Image', 'solanawp' ), 'slider' => __( 'Slider Shortcode', 'solanawp' ))));
+
+            // Content: Text
+            $wp_customize->add_setting( "{$config['id_prefix']}_content_text_main", array('default' => $config['default_text'], 'sanitize_callback' => 'wp_kses_post'));
+            $wp_customize->add_control( "{$config['id_prefix']}_content_text_main", array('label' => __( 'Main Text', 'solanawp' ), 'section' => $config['section'], 'type' => 'textarea'));
+            $wp_customize->add_setting( "{$config['id_prefix']}_content_text_sub", array('default' => $config['default_subtext'], 'sanitize_callback' => 'wp_kses_post'));
+            $wp_customize->add_control( "{$config['id_prefix']}_content_text_sub", array('label' => __( 'Sub Text', 'solanawp' ), 'section' => $config['section'], 'type' => 'textarea'));
+
+            // Content: Font Options
+            $wp_customize->add_setting( "{$config['id_prefix']}_font_family", array('default' => 'inherit', 'sanitize_callback' => 'sanitize_text_field'));
+            $wp_customize->add_control( "{$config['id_prefix']}_font_family", array('label' => __( 'Font Family', 'solanawp' ), 'section' => $config['section'], 'type' => 'select', 'choices' => solanawp_get_font_choices()));
+            $wp_customize->add_setting( "{$config['id_prefix']}_font_size", array('default' => '', 'sanitize_callback' => 'absint'));
+            $wp_customize->add_control( "{$config['id_prefix']}_font_size", array('label' => __( 'Font Size (px)', 'solanawp' ), 'section' => $config['section'], 'type' => 'number', 'input_attrs' => array('min' => 10, 'max' => 100)));
+            $wp_customize->add_setting( "{$config['id_prefix']}_font_color", array('default' => ($key === 'hero' ? '#ffffff' : '#111827'), 'sanitize_callback' => 'sanitize_hex_color'));
+            $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, "{$config['id_prefix']}_font_color", array('label' => __( 'Font Color', 'solanawp' ), 'section' => $config['section'])));
+
+            // Content: Image
+            $wp_customize->add_setting( "{$config['id_prefix']}_content_image", array('sanitize_callback' => 'esc_url_raw'));
+            $wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, "{$config['id_prefix']}_content_image", array('label' => __( 'Content Image', 'solanawp' ), 'section' => $config['section'])));
+
+            // Content: Slider
+            $wp_customize->add_setting( "{$config['id_prefix']}_content_slider", array('default' => '', 'sanitize_callback' => 'sanitize_text_field'));
+            $wp_customize->add_control( "{$config['id_prefix']}_content_slider", array('label' => __( 'Revolution Slider Shortcode', 'solanawp' ), 'section' => $config['section'], 'type' => 'text'));
+        }
+
+        // --- Content Area Banner ---
+        $wp_customize->add_section('solanawp_content_banner_section', array(
+            'title' => __('Content Area Banner', 'solanawp'),
+            'panel' => 'solanawp_theme_options_panel',
+            'priority' => 31,
+            'description' => __('Configure the banner that appears below the "Recommended Security Tools".', 'solanawp'),
+        ));
+        $wp_customize->add_setting('solanawp_content_banner_html', array(
+            'default'           => '',
+            'sanitize_callback' => 'wp_kses_post', // Allows HTML
+            'transport'         => 'refresh',
+        ));
+        $wp_customize->add_control('solanawp_content_banner_html', array(
+            'label'   => __('Banner Content (HTML Allowed)', 'solanawp'),
+            'section' => 'solanawp_content_banner_section',
+            'type'    => 'textarea',
+        ));
+
 
         // --- Layout & Design Section ---
         $wp_customize->add_section(
@@ -153,62 +255,13 @@ if ( ! function_exists( 'solanawp_customize_register' ) ) :
             )
         );
 
-        // --- Blue Banner Section ---
+        // --- DEPRECATED Blue Banner Section ---
         $wp_customize->add_section( 'solanawp_blue_banner_section', array(
-            'title'       => __( 'Blue Info Banner', 'solanawp' ),
+            'title'       => __( 'Blue Info Banner (DEPRECATED)', 'solanawp' ),
             'panel'       => 'solanawp_theme_options_panel',
-            'priority'    => 15,
-            'description' => __( 'Customize the content and appearance of the blue informational banner.', 'solanawp'),
+            'priority'    => 16,
+            'description' => __( 'This section is deprecated. Please use the "Platform Banner" section instead.', 'solanawp'),
         ));
-
-        $wp_customize->add_setting( 'solanawp_blue_banner_main_text', array(
-            'default'           => __( 'Advanced Blockchain Analysis Platform', 'solanawp' ),
-            'sanitize_callback' => 'sanitize_text_field',
-            'transport'         => 'postMessage',
-        ));
-        $wp_customize->add_control( 'solanawp_blue_banner_main_text', array(
-            'label'    => __( 'Blue Banner - Main Text', 'solanawp' ),
-            'section'  => 'solanawp_blue_banner_section',
-            'type'     => 'text',
-            'priority' => 10,
-        ));
-
-        $wp_customize->add_setting( 'solanawp_blue_banner_sub_text', array(
-            'default'           => __( 'Real-time validation - Risk assessment - Professional insights', 'solanawp' ),
-            'sanitize_callback' => 'sanitize_text_field',
-            'transport'         => 'postMessage',
-        ));
-        $wp_customize->add_control( 'solanawp_blue_banner_sub_text', array(
-            'label'    => __( 'Blue Banner - Sub-Text', 'solanawp' ),
-            'section'  => 'solanawp_blue_banner_section',
-            'type'     => 'text',
-            'priority' => 20,
-        ));
-
-        // Blue Banner Background Color
-        $wp_customize->add_setting( 'solanawp_blue_banner_bg_color', array(
-            'default'           => '#1e3a8a', // Default blue
-            'sanitize_callback' => 'sanitize_hex_color',
-            'transport'         => 'postMessage',
-        ));
-        $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'solanawp_blue_banner_bg_color', array(
-            'label'    => __( 'Blue Banner Background Color', 'solanawp' ),
-            'section'  => 'solanawp_blue_banner_section',
-            'priority' => 30,
-        )));
-
-        // Blue Banner Text Color
-        $wp_customize->add_setting( 'solanawp_blue_banner_text_color_customizer', array(
-            'default'           => '#ffffff', // Default white
-            'sanitize_callback' => 'sanitize_hex_color',
-            'transport'         => 'postMessage',
-        ));
-        $wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'solanawp_blue_banner_text_color_customizer', array(
-            'label'    => __( 'Blue Banner Text Color', 'solanawp' ),
-            'section'  => 'solanawp_blue_banner_section',
-            'priority' => 40,
-        )));
-
 
         // --- Colors Section (Accent Colors) ---
         $wp_customize->add_section(
@@ -432,11 +485,14 @@ if ( ! function_exists( 'solanawp_customize_preview_js' ) ) :
             true
         );
 
+        //This has been removed because the settings are now fetched directly in header.php
+        /*
         wp_localize_script('solanawp-customizer-preview', 'solanawpCustomizerPreviewData', array(
             'blueBannerMainTextDefault' => __( 'Advanced Blockchain Analysis Platform', 'solanawp' ),
             'blueBannerSubTextDefault' => __( 'Real-time validation - Risk assessment - Professional insights', 'solanawp' ),
             'blueBannerBgColorDefault' => '#1e3a8a',
             'blueBannerTextColorDefault' => '#ffffff',
         ));
+        */
     }
 endif;

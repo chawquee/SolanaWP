@@ -3,6 +3,7 @@
  * Updated front-page.php with dynamic customizer ad banners
  * Replace existing front-page.php with this version
  * Implements all reference image improvements
+ * Version 2: Added custom content banner.
  */
 
 // Exit if accessed directly.
@@ -34,6 +35,19 @@ get_header(); // Includes header.php
                     <?php get_template_part( 'template-parts/checker/results-rugpull' ); ?>
                     <?php get_template_part( 'template-parts/checker/results-community' ); ?>
                     <?php get_template_part( 'template-parts/checker/results-affiliate' ); ?>
+
+                    <?php
+                    // --- New Custom Content Banner ---
+                    $content_banner_html = get_theme_mod('solanawp_content_banner_html', '');
+                    if (!empty($content_banner_html)) :
+                        ?>
+                        <div class="card content-area-banner" style="margin-bottom: 24px;">
+                            <div class="card-content">
+                                <?php echo wp_kses_post($content_banner_html); ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
                     <?php get_template_part( 'template-parts/checker/results-final' ); ?>
                 </div>
             </main>

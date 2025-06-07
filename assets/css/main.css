@@ -4,7 +4,7 @@ SolanaWP Complete Final CSS - Perfect Hannisolsvelte.html Match
 This is the complete, final CSS that perfectly replicates hannisolsvelte.html
 Includes all updates: reduced header, lighter colors, wider layout, edge-to-edge design
 Based on: hannisolsvelte.html + solanacheckerplan.txt + WordPress theme structure
-Version 3: Added header gaps.
+Version 4: Added style for new content banner.
 */
 
 /* Google Fonts Import - Handled by wp_enqueue_style in functions.php */
@@ -132,10 +132,6 @@ html, body {
 
 /* === NEW BLUE BANNER SECTION === */
 .hero-sub-banner {
-    /* background-color: #1e3a8a; */ /* Color will be set by CSS Var from Customizer */
-    /* color: var(--solanawp-blue-banner-text-color, #ffffff); */ /* Color will be set by CSS Var from Customizer */
-    background-color: var(--solanawp-blue-banner-bg-color-var, #1e3a8a); /* Fallback to original blue */
-    color: var(--solanawp-blue-banner-text-color-var, #ffffff); /* Fallback to white text */
     padding: 20px 24px;
     text-align: center;
     margin-bottom: 20px; /* Default Gap 2 */
@@ -178,7 +174,6 @@ html, body {
 
 /* === NEW SOLANA COINS ANALYZER SECTION === */
 .solana-coins-analyzer-section {
-    background-color: #ffffff;
     padding: 30px 24px;
     text-align: center;
     border-bottom: 1px solid #e5e7eb;
@@ -191,8 +186,6 @@ html, body {
     font-weight: 700;
     color: #111827;
     margin-bottom: 10px;
-    animation: sca-fade-in-up 0.8s ease-out forwards;
-    opacity: 0;
 }
 
 .solana-coins-analyzer-section .sca-subtitle {
@@ -203,8 +196,6 @@ html, body {
     line-height: 1.5;
     max-width: 700px;
     margin: 0 auto 15px auto;
-    animation: sca-fade-in-up 0.8s ease-out 0.2s forwards;
-    opacity: 0;
 }
 .solana-coins-analyzer-section .sca-subtitle p {
     margin-bottom: 5px;
@@ -212,19 +203,6 @@ html, body {
 .solana-coins-analyzer-section .sca-subtitle p:last-child {
     margin-bottom: 0;
 }
-
-
-@keyframes sca-fade-in-up {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 
 /* === WHITE TITLE SECTION (Solana Address Checker Title) === */
 .page-main-title-area {
@@ -384,6 +362,17 @@ html, body {
     color: #ccc !important;
 }
 
+/* === NEW CUSTOM CONTENT BANNER === */
+.content-area-banner {
+    width: 100%;
+    border: 2px solid #e5e7eb; /* Similar to ad banners */
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+.content-area-banner .card-content {
+    padding: 20px;
+    text-align: center;
+}
+
 
 /* === LIGHTER BLUE COLOR UPDATES (Using CSS Variables) === */
 :root {
@@ -393,11 +382,6 @@ html, body {
     --solanawp-primary-accent-color-rgba-04: rgba(59, 130, 246, 0.4);
     --solanawp-primary-accent-color-rgba-01: rgba(59, 130, 246, 0.1);
     --solanawp-primary-accent-color-rgba-015: rgba(59, 130, 246, 0.15);
-    /* --solanawp-blue-banner-text-color: #ffffff; /* DEPRECATED - Now using --solanawp-blue-banner-text-color-var */
-    /* --solanawp-blue-banner-bg-color: #1e3a8a;  /* DEPRECATED - Now using --solanawp-blue-banner-bg-color-var */
-    --solanawp-blue-banner-bg-color-var: #1e3a8a; /* Default set by functions.php */
-    --solanawp-blue-banner-text-color-var: #ffffff; /* Default set by functions.php */
-
 }
 
 a:hover,

@@ -1,7 +1,7 @@
 <?php
 /**
  * SolanaWP functions and definitions
- * Version 4: Refined sidebar ad logic for unified and persistent banners.
+ * Version 5: Added dynamic CSS for new banner customization.
  *
  * @link https://developer.wordpress.org/themes/basics/theme-functions/
  *
@@ -42,7 +42,6 @@ if ( function_exists( 'solanawp_register_custom_widgets' ) ) {
 }
 
 // --- Theme Customizer Additions ---
-// Uses solanawp_customizer_php_v3
 if (file_exists(get_template_directory() . '/inc/customizer.php')) {
     require get_template_directory() . '/inc/customizer.php';
     if ( function_exists( 'solanawp_customize_register' ) ) {
@@ -318,10 +317,46 @@ if ( ! function_exists( 'solanawp_enhanced_customizer_css_output' ) ) :
         $analyzer_width_scale = get_theme_mod( 'solanawp_analyzer_width', 100 );
         $primary_color = get_theme_mod( 'solanawp_primary_accent_color', '#3b82f6' );
         $secondary_color = get_theme_mod( 'solanawp_secondary_accent_color', '#8b5cf6' );
-        $blue_banner_bg_color = get_theme_mod( 'solanawp_blue_banner_bg_color', '#1e3a8a' );
-        $blue_banner_text_color = get_theme_mod( 'solanawp_blue_banner_text_color_customizer', '#ffffff' );
 
         $css = '<style type="text/css" id="solanawp-enhanced-customizer-css">';
+
+        // --- Loop for Hero and Analyzer Banners ---
+        $banners_to_style = array(
+            'hero' => array('selector' => '.hero-sub-banner', 'prefix' => 'solanawp_hero'),
+            'analyzer' => array('selector' => '.solana-coins-analyzer-section', 'prefix' => 'solanawp_analyzer')
+        );
+
+        foreach ($banners_to_style as $key => $config) {
+            $bg_type = get_theme_mod("{$config['prefix']}_bg_type", 'color');
+            $bg_color = get_theme_mod("{$config['prefix']}_bg_color", ($key === 'hero' ? '#1e3a8a' : '#ffffff'));
+            $bg_image = get_theme_mod("{$config['prefix']}_bg_image", '');
+
+            if ($bg_type === 'image' && !empty($bg_image)) {
+                $css .= "{$config['selector']} { background-image: url(" . esc_url($bg_image) . "); background-size: cover; background-position: center; }";
+            } else {
+                $css .= "{$config['selector']} { background-color: " . esc_attr($bg_color) . "; }";
+            }
+
+            // Font styles
+            $font_family = get_theme_mod("{$config['prefix']}_font_family", 'inherit');
+            $font_size = get_theme_mod("{$config['prefix']}_font_size", '');
+            $font_color = get_theme_mod("{$config['prefix']}_font_color", ($key === 'hero' ? '#ffffff' : '#111827'));
+
+            $text_selector = "{$config['selector']} h2, {$config['selector']} p, {$config['selector']} div";
+            $css .= "{$text_selector} {";
+            if ($font_family !== 'inherit') { $css .= "font-family: " . esc_attr($font_family) . " !important;"; }
+            if (!empty($font_color)) { $css .= "color: " . esc_attr($font_color) . " !important;"; }
+            $css .= "}";
+
+            if (!empty($font_size)) {
+                $main_text_selector = "{$config['selector']} h2";
+                $sub_text_selector = "{$config['selector']} p, {$config['selector']} div:not([class*='container'])";
+                $css .= "{$main_text_selector} { font-size: " . esc_attr($font_size) . "px !important; }";
+                $css .= "{$sub_text_selector} { font-size: " . esc_attr(floor($font_size * 0.7)) . "px !important; }";
+            }
+        }
+
+        // --- General Layout Styles ---
         $default_gap = '20px';
         $css .= '.site-header .header { margin-bottom: ' . $default_gap . '; }';
         $css .= '.hero-sub-banner { margin-bottom: ' . $default_gap . '; }';
@@ -351,16 +386,6 @@ if ( ! function_exists( 'solanawp_enhanced_customizer_css_output' ) ) :
         :root {
             --solanawp-primary-accent-color: ' . esc_attr( $primary_color ) . ';
             --solanawp-secondary-accent-color: ' . esc_attr( $secondary_color ) . ';
-            --solanawp-blue-banner-bg-color-var: ' . esc_attr( $blue_banner_bg_color ) . ';
-            --solanawp-blue-banner-text-color-var: ' . esc_attr( $blue_banner_text_color ) . ';
-        }
-        .hero-sub-banner {
-            background-color: var(--solanawp-blue-banner-bg-color-var) !important;
-        }
-        .hero-sub-banner .hero-sub-banner-main-text,
-        .hero-sub-banner .hero-sub-banner-sub-text,
-        .hero-sub-banner .hero-sub-banner-icon {
-            color: var(--solanawp-blue-banner-text-color-var) !important;
         }
         a:hover, .primary-menu li a:hover, .primary-menu .current-menu-item > a, .text-blue, .sol-balance-value,
         .widget-area .widget ul li a:hover, .site-footer .site-info a:hover, .reply .comment-reply-link,
@@ -432,7 +457,7 @@ function solanawp_add_dashboard_widget() {
     wp_add_dashboard_widget('solanawp_dashboard_widget', __('SolanaWP Theme Options', 'solanawp'), 'solanawp_dashboard_widget_content');
 }
 function solanawp_dashboard_widget_content() {
-    echo '<div style="text-align: center; padding: 20px;"><h3>' . esc_html__('Customize Your Solana Address Checker', 'solanawp') . '</h3><p>' . esc_html__('Quickly access theme customization options to match your reference design.', 'solanawp') . '</p><div style="margin: 20px 0;"><a href="' . esc_url(admin_url('customize.php?autofocus[section]=solanawp_layout_section')) . '" class="button button-primary" style="margin: 5px;">' . esc_html__('Layout & Design', 'solanawp') . '</a> <a href="' . esc_url(admin_url('customize.php?autofocus[section]=solanawp_sidebar_ads_section')) . '" class="button" style="margin: 5px;">' . esc_html__('Sidebar Ad Banners', 'solanawp') . '</a> <a href="' . esc_url(admin_url('customize.php?autofocus[section]=solanawp_colors_section')) . '" class="button" style="margin: 5px;">' . esc_html__('Accent Colors', 'solanawp') . '</a><a href="' . esc_url(admin_url('customize.php?autofocus[section]=solanawp_blue_banner_section')) . '" class="button" style="margin: 5px;">' . esc_html__('Blue Banner Options', 'solanawp') . '</a></div><div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin-top: 15px;"><strong>' . esc_html__('Quick Tips:', 'solanawp') . '</strong><ul style="text-align: left; margin: 10px 0;"><li>' . esc_html__('Set Header Height to 50% for compact design', 'solanawp') . '</li><li>' . esc_html__('Use Banner Edge Distance of 113px for 3cm spacing', 'solanawp') . '</li><li>' . esc_html__('Increase Analyzer Width to 110% for wider frame', 'solanawp') . '</li><li>' . esc_html__('Set Primary Color to #3b82f6 for lighter blue', 'solanawp') . '</li></ul></div></div>';
+    echo '<div style="text-align: center; padding: 20px;"><h3>' . esc_html__('Customize Your Solana Address Checker', 'solanawp') . '</h3><p>' . esc_html__('Quickly access theme customization options to match your reference design.', 'solanawp') . '</p><div style="margin: 20px 0;"><a href="' . esc_url(admin_url('customize.php?autofocus[section]=solanawp_layout_section')) . '" class="button button-primary" style="margin: 5px;">' . esc_html__('Layout & Design', 'solanawp') . '</a> <a href="' . esc_url(admin_url('customize.php?autofocus[section]=solanawp_sidebar_ads_section')) . '" class="button" style="margin: 5px;">' . esc_html__('Sidebar Ad Banners', 'solanawp') . '</a> <a href="' . esc_url(admin_url('customize.php?autofocus[section]=solanawp_colors_section')) . '" class="button" style="margin: 5px;">' . esc_html__('Accent Colors', 'solanawp') . '</a><a href="' . esc_url(admin_url('customize.php?autofocus[section]=solanawp_hero_banner_section')) . '" class="button" style="margin: 5px;">' . esc_html__('Platform Banner', 'solanawp') . '</a></div><div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin-top: 15px;"><strong>' . esc_html__('Quick Tips:', 'solanawp') . '</strong><ul style="text-align: left; margin: 10px 0;"><li>' . esc_html__('Set Header Height to 50% for compact design', 'solanawp') . '</li><li>' . esc_html__('Use Banner Edge Distance of 113px for 3cm spacing', 'solanawp') . '</li><li>' . esc_html__('Increase Analyzer Width to 110% for wider frame', 'solanawp') . '</li><li>' . esc_html__('Set Primary Color to #3b82f6 for lighter blue', 'solanawp') . '</li></ul></div></div>';
 }
 
 // Function to get the right sidebar (uses unified ad rendering)

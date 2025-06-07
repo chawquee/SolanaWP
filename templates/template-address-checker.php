@@ -3,6 +3,7 @@
  * UPDATED templates/template-address-checker.php
  * Replace the existing template-address-checker.php with this version
  * Includes the new symmetric layout with both sidebars (right sidebar is now dynamic)
+ * Version 2: Added custom content banner.
  */
 
 // Exit if accessed directly.
@@ -13,24 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 get_header(); // Includes header.php
 ?>
     <div class="main-container">
-        <!-- Left Sidebar -->
         <?php get_sidebar(); // This will display the left sidebar (dynamically rendered from Customizer) ?>
 
-        <!-- Main Content Area -->
         <div id="primary" class="content-area address-checker-content">
             <main id="main" class="site-main solanawp-checker-main" role="main">
                 <?php
                 // Page content (like from the WordPress editor for this page)
                 // is intentionally not displayed for the checker template by default
                 // to keep the focus on the checker tool.
-                // If you need to show content from the WP editor, you can uncomment the loop:
-                /*
-                while ( have_posts() ) :
-                    the_post();
-                    the_content();
-                endwhile;
-                wp_reset_postdata();
-                */
                 ?>
 
                 <?php // --- Input Section for the address checker --- ?>
@@ -50,12 +41,24 @@ get_header(); // Includes header.php
                     <?php get_template_part( 'template-parts/checker/results-rugpull' ); ?>
                     <?php get_template_part( 'template-parts/checker/results-community' ); ?>
                     <?php get_template_part( 'template-parts/checker/results-affiliate' ); ?>
+
+                    <?php
+                    // --- New Custom Content Banner ---
+                    $content_banner_html = get_theme_mod('solanawp_content_banner_html', '');
+                    if (!empty($content_banner_html)) :
+                        ?>
+                        <div class="card content-area-banner" style="margin-bottom: 24px;">
+                            <div class="card-content">
+                                <?php echo wp_kses_post($content_banner_html); ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
                     <?php get_template_part( 'template-parts/checker/results-final' ); ?>
                 </div>
             </main>
         </div>
 
-        <!-- Right Sidebar (Updated to be dynamic) -->
         <?php
         // Ensure the function exists before calling it.
         // This function is defined in functions.php and renders ads from the Customizer

@@ -3,6 +3,7 @@
  * The header for the SolanaWP theme.
  *
  * This is the template that displays all of hte <head> section and everything up until main content.
+ * Version 5: Added dynamic rendering for Hero and Analyzer banners.
  *
  * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
@@ -14,6 +15,60 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+
+/**
+ * Helper function to render a customizable banner.
+ *
+ * @param string $prefix The Customizer setting prefix (e.g., 'solanawp_hero').
+ * @param string $css_class The CSS class for the banner container.
+ * @param array $defaults Default text values.
+ */
+function solanawp_render_customizable_banner($prefix, $css_class, $defaults) {
+    $content_type = get_theme_mod("{$prefix}_content_type", 'text');
+
+    echo '<div class="' . esc_attr($css_class) . '">'; // Main container
+
+    switch ($content_type) {
+        case 'image':
+            $img_url = get_theme_mod("{$prefix}_content_image", '');
+            if (!empty($img_url)) {
+                echo '<img src="' . esc_url($img_url) . '" alt="' . esc_attr__( 'Banner Content Image', 'solanawp' ) . '" style="width:100%; height:auto; display:block;">';
+            }
+            break;
+
+        case 'slider':
+            $slider_shortcode = get_theme_mod("{$prefix}_content_slider", '');
+            if (!empty($slider_shortcode) && function_exists('do_shortcode')) {
+                echo do_shortcode(wp_kses_post($slider_shortcode));
+            }
+            break;
+
+        default: // 'text' case
+            $main_text = get_theme_mod("{$prefix}_content_text_main", $defaults['main']);
+            $sub_text = get_theme_mod("{$prefix}_content_text_sub", $defaults['sub']);
+
+            $container_class = ($prefix === 'solanawp_hero') ? 'hero-sub-banner-container' : 'sca-container';
+            $main_text_class = ($prefix === 'solanawp_hero') ? 'hero-sub-banner-main-text' : 'sca-title';
+            $sub_text_class = ($prefix === 'solanawp_hero') ? 'hero-sub-banner-sub-text' : 'sca-subtitle';
+
+            echo '<div class="' . esc_attr($container_class) . '">';
+            if ($prefix === 'solanawp_hero') {
+                echo '<span class="dashicons dashicons-rocke hero-sub-banner-icon"></span>';
+            }
+            echo '<div class="hero-sub-banner-text-content">'; // Generic text content wrapper
+            if (!empty($main_text)) {
+                echo '<h2 class="' . esc_attr($main_text_class) . '">' . wp_kses_post($main_text) . '</h2>';
+            }
+            if (!empty($sub_text)) {
+                echo '<div class="' . esc_attr($sub_text_class) . '">' . wp_kses_post($sub_text) . '</div>';
+            }
+            echo '</div></div>';
+            break;
+    }
+
+    echo '</div>'; // Close main container
+}
+
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -32,20 +87,12 @@ if ( ! defined( 'ABSPATH' ) ) {
         <?php esc_html_e( 'Skip to content', 'solanawp' ); ?>
     </a>
 
-    <?php // PART 1: Topmost Header Section (Logo/Brand) ?>
+    <?php // PART 1: Topmost Header Section (Logo/Brand) - UNCHANGED ?>
     <header id="masthead" class="site-header" role="banner">
         <div class="header">
             <?php
-            // Display site branding (logo, site title/tagline or "HANNISOL" brand name).
-            get_template_part( 'template-parts/layout/header-branding' ); //
-            ?>
-            <?php
-            // Primary navigation menu - this was inside .header.
-            // If it's part of the topmost bar, it stays. If it's part of a different section, move accordingly.
-            // For now, assuming it's part of the topmost bar.
-            // However, navigation is currently disabled by functions.php solanawp_disable_navigation_menus and solanawp_force_hide_navigation.
-            // If navigation were enabled, this would be its location in the topmost bar.
-            if ( has_nav_menu( 'primary' ) && function_exists('solanawp_disable_navigation_menus') === false ) : // Check if it's not disabled
+            get_template_part( 'template-parts/layout/header-branding' );
+            if ( has_nav_menu( 'primary' ) && function_exists('solanawp_disable_navigation_menus') === false ) :
                 ?>
                 <nav id="site-navigation" class="main-navigation" role="navigation" aria-label="<?php esc_attr_e( 'Primary Menu', 'solanawp' ); ?>">
                     <?php
@@ -65,37 +112,38 @@ if ( ! defined( 'ABSPATH' ) ) {
         </div>
     </header>
 
-    <?php // PART 2: New Blue Banner Section ?>
-    <div class="hero-sub-banner">
-        <div class="hero-sub-banner-container"> <?php // Added container for better content control ?>
-            <span class="dashicons dashicons-rocke hero-sub-banner-icon"></span> <?php // Placeholder Icon ?>
-            <div class="hero-sub-banner-text-content">
-                <h2 class="hero-sub-banner-main-text">
-                    <?php echo esc_html( get_theme_mod( 'solanawp_blue_banner_main_text', __( 'Advanced Blockchain Analysis Platform', 'solanawp' ) ) ); ?>
-                </h2>
-                <p class="hero-sub-banner-sub-text">
-                    <?php echo esc_html( get_theme_mod( 'solanawp_blue_banner_sub_text', __( 'Real-time validation - Risk assessment - Professional insights', 'solanawp' ) ) ); ?>
-                </p>
-            </div>
-        </div>
-    </div>
+    <?php // PART 2: Customizable "Platform Banner" ?>
+    <?php
+    solanawp_render_customizable_banner(
+        'solanawp_hero',
+        'hero-sub-banner',
+        array(
+            'main' => __( 'Advanced Blockchain Analysis Platform', 'solanawp' ),
+            'sub' => __( 'Real-time validation - Risk assessment - Professional insights', 'solanawp' )
+        )
+    );
+    ?>
 
-    <?php // PART 2.5: New "Solana Coins Analyzer" Section (Added as per instructions) ?>
-    <div class="solana-coins-analyzer-section">
-        <h2 class="sca-title"><?php esc_html_e( 'Solana Coins Analyzer', 'solanawp' ); ?></h2>
-        <div class="sca-subtitle">
-            <p><?php esc_html_e( 'Comprehensive validation and analysis for Solana addresses', 'solanawp' ); ?></p>
-            <p><?php esc_html_e( "Hannisol's Insight, Navigating Crypto Like Hannibal Crossed the Alps.", 'solanawp' ); ?></p>
-        </div>
-    </div>
+    <?php // PART 2.5: Customizable "Analyzer Title Banner" ?>
+    <?php
+    solanawp_render_customizable_banner(
+        'solanawp_analyzer',
+        'solana-coins-analyzer-section',
+        array(
+            'main' => __( 'Solana Coins Analyzer', 'solanawp' ),
+            'sub' => '<p>' . __( 'Comprehensive validation and analysis for Solana addresses', 'solanawp' ) . '</p>' .
+                '<p>' . __( "Hannisol's Insight, Navigating Crypto Like Hannibal Crossed the Alps.", 'solanawp' ) . '</p>'
+        )
+    );
+    ?>
+
 
     <?php // PART 3: White Title Section (Main Title, Subtitle, Slogan for Checker) ?>
     <?php
     $display_main_titles = false;
-    // Determine if the main "Solana Address Checker" titles should be displayed.
-    // This logic checks if the current page is the front page designated as the checker,
-    // or if it's any page using the 'template-address-checker.php' template,
-    // or if it's a page containing a specific shortcode (e.g., [solana_checker_form]).
+    // This logic determines if the static "Solana Address Checker" title should be displayed.
+    // It is now superseded by the customizable banner above, so we might want to disable it.
+    // For now, keeping the logic but it might be redundant.
     if ( is_front_page() ) {
         $front_page_id = get_option('page_on_front');
         if ($front_page_id) {
@@ -112,7 +160,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     }
 
 
-    if ( $display_main_titles ) :
+    if ( false ) : // Set to false to hide the old static title block, as it's replaced by the customizable banner.
         ?>
         <div class="page-main-title-area"> <?php // New wrapper class for this section ?>
             <h1 class="main-title"><?php echo esc_html__( 'Solana Address Checker', 'solanawp' ); ?></h1>
